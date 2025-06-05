@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Sale Details - Bakery Management System{% endblock %}
+
+{% block page_title %}Sale Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Sale #{{ sale.id }}</h5>
+                <div>
+                    {% if sale.payment_status != 'completed' %}
+                    <a href="{{ url_for('process_payment', id=sale.id) }}" class="btn btn-primary">
+                        <i class="fas fa-money-bill"></i> Process Payment
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('sale_payments', id=sale.id) }}" class="btn btn-info">
+                        <i class="fas fa-list"></i> View Payments
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Date:</strong> {{ sale.sale_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                        <p><strong>Customer:</strong> {{ sale.customer_name or 'Walk-in Customer' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Total Amount:</strong> KES {{ "%.2f"|format(sale.total_amount) }}</p>
+                        <p><strong>Payment Status:</strong> 
+                            <span class="badge {% if sale.payment_status == 'completed' %}bg-success{% elif sale.payment_status == 'partial' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ sale.payment_status|title }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <h6>Items</h6>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in sale.items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>KES {{ "%.2f"|format(item.unit_price) }}</td>
+                                <td>KES {{ "%.2f"|format(item.total_price) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                <td><strong>KES {{ "%.2f"|format(sale.total_amount) }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Payment Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Total Amount</h6>
+                    <h3 class="text-primary">KES {{ "%.2f"|format(sale.total_amount) }}</h3>
+                </div>
+                <div class="mb-3">
+                    <h6>Total Paid</h6>
+                    <h3 class="text-success">KES {{ "%.2f"|format(sale.payments|sum(attribute='amount')) }}</h3>
+                </div>
+                <div class="mb-3">
+                    <h6>Balance</h6>
+                    <h3 class="text-info">KES {{ "%.2f"|format(sale.total_amount - sale.payments|sum(attribute='amount')) }}</h3>
+                </div>
+                {% if sale.payments %}
+                <h6>Recent Payments</h6>
+                <div class="list-group">
+                    {% for payment in sale.payments[:3] %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ payment.payment_method|title }}</h6>
+                            <small>{{ payment.payment_date.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <p class="mb-1">KES {{ "%.2f"|format(payment.amount) }}</p>
+                        <small class="text-muted">
+                            Status: 
+                            <span class="badge {% if payment.status == 'completed' %}bg-success{% elif payment.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ payment.status|title }}
+                            </span>
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
