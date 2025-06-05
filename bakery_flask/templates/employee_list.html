@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Employees</h2>
-        <a href="{{ url_for('employee_create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add Employee
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-column flex-md-row">
+        <h2 class="mb-2 mb-md-0">Employees</h2>
+        <a href="{{ url_for('employee_create') }}" class="btn btn-primary w-100 w-md-auto">
+            <i class="fas fa-plus me-1"></i> Add Employee
         </a>
     </div>
 
@@ -35,10 +35,10 @@
                             </td>
                             <td>
                                 {% if employee.phone %}
-                                    <i class="fas fa-phone"></i> {{ employee.phone }}<br>
+                                    <i class="fas fa-phone me-1"></i> {{ employee.phone }}<br>
                                 {% endif %}
                                 {% if employee.email %}
-                                    <i class="fas fa-envelope"></i> {{ employee.email }}
+                                    <i class="fas fa-envelope me-1"></i> {{ employee.email }}
                                 {% endif %}
                             </td>
                             <td>
@@ -49,14 +49,15 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <div class="btn-group">
-                                    <a href="{{ url_for('employee_edit', id=employee.id) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-edit"></i>
+                                {# Use a flex container for buttons on small screens #}
+                                <div class="d-flex flex-nowrap">
+                                    <a href="{{ url_for('employee_edit', id=employee.id) }}" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-edit"></i> <span class="d-none d-lg-inline">Edit</span>
                                     </a>
                                     <button type="button" class="btn btn-sm btn-outline-danger" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#deleteModal{{ employee.id }}">
-                                        <i class="fas fa-trash"></i>
+                                        <i class="fas fa-trash"></i> <span class="d-none d-lg-inline">Delete</span>
                                     </button>
                                 </div>
 
