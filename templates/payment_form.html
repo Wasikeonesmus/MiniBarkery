@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Process Payment - Bakery Management System{% endblock %}
+
+{% block page_title %}Process Payment{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Sale Details</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Sale ID:</strong> {{ sale.id }}</p>
+                <p><strong>Date:</strong> {{ sale.sale_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p><strong>Customer:</strong> {{ sale.customer_name or 'Walk-in Customer' }}</p>
+                <p><strong>Total Amount:</strong> KES {{ "%.2f"|format(sale.total_amount) }}</p>
+                <p><strong>Payment Status:</strong> 
+                    <span class="badge {% if sale.payment_status == 'completed' %}bg-success{% elif sale.payment_status == 'partial' %}bg-warning{% else %}bg-danger{% endif %}">
+                        {{ sale.payment_status|title }}
+                    </span>
+                </p>
+                {% if sale.payments %}
+                <h6>Previous Payments:</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in sale.payments %}
+                            <tr>
+                                <td>{{ payment.payment_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>KES {{ "%.2f"|format(payment.amount) }}</td>
+                                <td>{{ payment.payment_method|title }}</td>
+                                <td>
+                                    <span class="badge {% if payment.status == 'completed' %}bg-success{% elif payment.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ payment.status|title }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Process Payment</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.amount.label(class="form-label") }}
+                        {{ form.amount(class="form-control") }}
+                        {% if form.amount.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.amount.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.payment_method.label(class="form-label") }}
+                        {{ form.payment_method(class="form-select") }}
+                        {% if form.payment_method.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.payment_method.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3" id="transaction_id_field" style="display: none;">
+                        {{ form.transaction_id.label(class="form-label") }}
+                        {{ form.transaction_id(class="form-control") }}
+                        {% if form.transaction_id.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.transaction_id.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethod = document.querySelector('#payment_method');
+    const transactionIdField = document.querySelector('#transaction_id_field');
+    
+    function toggleTransactionId() {
+        const method = paymentMethod.value;
+        transactionIdField.style.display = (method === 'mpesa' || method === 'card') ? 'block' : 'none';
+    }
+    
+    paymentMethod.addEventListener('change', toggleTransactionId);
+    toggleTransactionId();
+});
+</script>
+{% endblock %}
+{% endblock %}

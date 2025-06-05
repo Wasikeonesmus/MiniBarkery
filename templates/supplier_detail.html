@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Supplier Details - {{ supplier.name }}{% endblock %}
+
+{% block page_title %}Supplier Details - {{ supplier.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Supplier Information</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Name</dt>
+                    <dd class="col-sm-8">{{ supplier.name }}</dd>
+                    
+                    <dt class="col-sm-4">Contact Person</dt>
+                    <dd class="col-sm-8">{{ supplier.contact_person }}</dd>
+                    
+                    <dt class="col-sm-4">Phone</dt>
+                    <dd class="col-sm-8">{{ supplier.phone }}</dd>
+                    
+                    <dt class="col-sm-4">Email</dt>
+                    <dd class="col-sm-8">{{ supplier.email }}</dd>
+                    
+                    <dt class="col-sm-4">Address</dt>
+                    <dd class="col-sm-8">{{ supplier.address }}</dd>
+                    
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge {% if supplier.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ "Active" if supplier.is_active else "Inactive" }}
+                        </span>
+                    </dd>
+                </dl>
+                
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('edit_supplier', id=supplier.id) }}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Edit Supplier
+                    </a>
+                    <a href="{{ url_for('supplier_list') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Supplied Products</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category }}</td>
+                                <td>${{ "%.2f"|format(product.price) }}</td>
+                                <td>{{ product.stock_quantity }}</td>
+                                <td>
+                                    <span class="badge {% if product.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ "Active" if product.is_active else "Inactive" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('product_detail', id=product.id) }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('edit_product', id=product.id) }}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

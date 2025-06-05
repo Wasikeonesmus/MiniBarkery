@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Production - Bakery Management System{% endblock %}
+
+{% block page_title %}Production Management{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newBatchModal">
+            <i class="fas fa-plus"></i> Start New Batch
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recipes -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Recipes</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for recipe in recipes %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ recipe.name }}</h6>
+                            <small class="text-muted">Yield: {{ recipe.yield_quantity }}</small>
+                        </div>
+                        <p class="mb-1">{{ recipe.description }}</p>
+                        <small class="text-muted">
+                            Prep Time: {{ recipe.preparation_time }} minutes
+                        </small>
+                    </div>
+                    {% else %}
+                    <div class="list-group-item">No recipes available</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Batches -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Production Batches</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for batch in recent_batches %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ batch.recipe.name }}</h6>
+                            <small class="text-muted">{{ batch.start_time.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <p class="mb-1">
+                            Batch #{{ batch.batch_number }}<br>
+                            Quantity: {{ batch.quantity_produced }}
+                        </p>
+                        <small class="text-muted">{{ batch.notes }}</small>
+                    </div>
+                    {% else %}
+                    <div class="list-group-item">No recent batches</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Batch Modal -->
+<div class="modal fade" id="newBatchModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Start New Production Batch</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="batchForm">
+                    <div class="mb-3">
+                        <label class="form-label">Recipe</label>
+                        <select class="form-select" name="recipe_id" required>
+                            {% for recipe in recipes %}
+                            <option value="{{ recipe.id }}">{{ recipe.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Batch Number</label>
+                        <input type="text" class="form-control" name="batch_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantity to Produce</label>
+                        <input type="number" class="form-control" name="quantity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitBatch()">Start Batch</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function submitBatch() {
+    const form = document.getElementById('batchForm');
+    const formData = new FormData(form);
+    
+    // TODO: Implement batch submission
+    alert('Batch submission not implemented yet.');
+    
+    // Close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('newBatchModal'));
+    modal.hide();
+}
+</script>
+{% endblock %}
+{% endblock %} 

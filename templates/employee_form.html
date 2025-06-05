@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{% if employee %}Edit{% else %}Add{% endif %} Employee</h2>
+    <form method="POST" class="mt-4">
+        {{ form.hidden_tag() }}
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control") }}
+                    {% for error in form.name.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.phone.label(class="form-label") }}
+                    {{ form.phone(class="form-control") }}
+                    {% for error in form.phone.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+                    {% for error in form.email.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="mb-3">
+                    {{ form.role.label(class="form-label") }}
+                    {{ form.role(class="form-select") }}
+                    {% for error in form.role.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.department.label(class="form-label") }}
+                    {{ form.department(class="form-select") }}
+                    {% for error in form.department.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.salary.label(class="form-label") }}
+                    <div class="input-group">
+                        <span class="input-group-text">KES</span>
+                        {{ form.salary(class="form-control") }}
+                    </div>
+                    {% for error in form.salary.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.hire_date.label(class="form-label") }}
+                    {{ form.hire_date(class="form-control", type="date") }}
+                    {% for error in form.hire_date.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-12">
+                <h4>Permissions</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-check mb-2">
+                            {{ form.can_manage_employees(class="form-check-input") }}
+                            {{ form.can_manage_employees.label(class="form-check-label") }}
+                        </div>
+                        <div class="form-check mb-2">
+                            {{ form.can_manage_inventory(class="form-check-input") }}
+                            {{ form.can_manage_inventory.label(class="form-check-label") }}
+                        </div>
+                        <div class="form-check mb-2">
+                            {{ form.can_manage_finance(class="form-check-input") }}
+                            {{ form.can_manage_finance.label(class="form-check-label") }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check mb-2">
+                            {{ form.can_manage_system(class="form-check-input") }}
+                            {{ form.can_manage_system.label(class="form-check-label") }}
+                        </div>
+                        <div class="form-check mb-2">
+                            {{ form.can_manage_suppliers(class="form-check-input") }}
+                            {{ form.can_manage_suppliers.label(class="form-check-label") }}
+                        </div>
+                        <div class="form-check mb-2">
+                            {{ form.can_process_sales(class="form-check-input") }}
+                            {{ form.can_process_sales.label(class="form-check-label") }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check mb-2">
+                            {{ form.can_manage_production(class="form-check-input") }}
+                            {{ form.can_manage_production.label(class="form-check-label") }}
+                        </div>
+                        <div class="form-check mb-2">
+                            {{ form.is_active(class="form-check-input") }}
+                            {{ form.is_active.label(class="form-check-label") }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            {{ form.submit(class="btn btn-primary") }}
+            <a href="{{ url_for('employee_list') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('role');
+    const departmentSelect = document.getElementById('department');
+    
+    // Function to update permissions based on role
+    function updatePermissions() {
+        const role = roleSelect.value;
+        const permissions = {
+            'baker': ['can_manage_production'],
+            'sales': ['can_process_sales'],
+            'cleaning': [],
+            'manager': ['can_manage_employees', 'can_manage_inventory', 'can_manage_finance', 'can_manage_suppliers', 'can_process_sales', 'can_manage_production'],
+            'inventory_manager': ['can_manage_inventory', 'can_manage_suppliers'],
+            'accountant': ['can_manage_finance'],
+            'system_admin': ['can_manage_employees', 'can_manage_inventory', 'can_manage_finance', 'can_manage_system', 'can_manage_suppliers', 'can_process_sales', 'can_manage_production']
+        };
+        
+        // Reset all permissions
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+            checkbox.disabled = false;
+        });
+        
+        // Set permissions based on role
+        if (permissions[role]) {
+            permissions[role].forEach(permission => {
+                const checkbox = document.getElementById(permission);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    checkbox.disabled = true;
+                }
+            });
+        }
+    }
+    
+    // Update permissions when role changes
+    roleSelect.addEventListener('change', updatePermissions);
+    
+    // Initial update
+    updatePermissions();
+});
+</script>
+{% endblock %} 

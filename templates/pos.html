@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}POS - Bakery Management System{% endblock %}
+
+{% block page_title %}Point of Sale{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Products Grid -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-transparent">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Products</h5>
+                        <div class="input-group" style="max-width: 300px;">
+                            <input type="text" id="searchInput" class="form-control" placeholder="Search products...">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3" id="productsGrid">
+                        {% for product in products %}
+                        <div class="col-6 col-md-4 col-lg-3 product-card" data-name="{{ product.name|lower }}">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title mb-2">{{ product.name }}</h6>
+                                    <p class="card-text text-primary mb-2">KES {{ "%.2f"|format(product.price) }}</p>
+                                    <p class="card-text small text-muted mb-2">Stock: {{ product.stock_quantity }}</p>
+                                    <button class="btn btn-primary btn-sm w-100 add-to-cart" 
+                                            data-id="{{ product.id }}"
+                                            data-name="{{ product.name }}"
+                                            data-price="{{ product.price }}"
+                                            {% if product.stock_quantity <= 0 %}disabled{% endif %}>
+                                        <i class="fas fa-plus me-1"></i>Add to Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">Current Sale</h5>
+                </div>
+                <div class="card-body">
+                    <div class="cart-items mb-3" style="max-height: 400px; overflow-y: auto;">
+                        <div id="cartItems">
+                            <!-- Cart items will be added here dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="cart-summary">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span id="subtotal">KES 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tax (16%):</span>
+                            <span id="tax">KES 0.00</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total:</strong>
+                            <strong id="total">KES 0.00</strong>
+                        </div>
+
+                        <form id="saleForm" method="POST" action="{{ url_for('process_sale') }}">
+                            <input type="hidden" name="items" id="saleItems">
+                            <input type="hidden" name="total_amount" id="saleTotal">
+                            
+                            <div class="mb-3">
+                                <label for="customerName" class="form-label">Customer Name</label>
+                                <input type="text" class="form-control" id="customerName" name="customer_name">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="paymentMethod" class="form-label">Payment Method</label>
+                                <select class="form-select" id="paymentMethod" name="payment_method" required>
+                                    <option value="cash">Cash</option>
+                                    <option value="mpesa">M-PESA</option>
+                                    <option value="card">Card</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success" id="completeSale" disabled>
+                                    <i class="fas fa-check me-1"></i>Complete Sale
+                                </button>
+                                <button type="button" class="btn btn-danger" id="clearCart">
+                                    <i class="fas fa-trash me-1"></i>Clear Cart
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cart = [];
+    const productsGrid = document.getElementById('productsGrid');
+    const cartItems = document.getElementById('cartItems');
+    const subtotalElement = document.getElementById('subtotal');
+    const taxElement = document.getElementById('tax');
+    const totalElement = document.getElementById('total');
+    const completeSaleButton = document.getElementById('completeSale');
+    const clearCartButton = document.getElementById('clearCart');
+    const searchInput = document.getElementById('searchInput');
+    const saleForm = document.getElementById('saleForm');
+    const saleItemsInput = document.getElementById('saleItems');
+    const saleTotalInput = document.getElementById('saleTotal');
+    const paymentMethodSelect = document.getElementById('paymentMethod');
+
+    // Add to cart functionality
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const name = this.dataset.name;
+            const price = parseFloat(this.dataset.price);
+            
+            const existingItem = cart.find(item => item.id === id);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({
+                    id: id,
+                    name: name,
+                    price: price,
+                    quantity: 1
+                });
+            }
+            
+            updateCart();
+        });
+    });
+
+    // Update cart display
+    function updateCart() {
+        cartItems.innerHTML = '';
+        let subtotal = 0;
+
+        cart.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            subtotal += itemTotal;
+
+            const itemElement = document.createElement('div');
+            itemElement.className = 'card mb-2';
+            itemElement.innerHTML = `
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">${item.name}</h6>
+                            <small class="text-muted">KES ${item.price.toFixed(2)} x ${item.quantity}</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="btn-group btn-group-sm me-2">
+                                <button type="button" class="btn btn-outline-secondary decrease-quantity" data-id="${item.id}">-</button>
+                                <button type="button" class="btn btn-outline-secondary increase-quantity" data-id="${item.id}">+</button>
+                            </div>
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-item" data-id="${item.id}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            cartItems.appendChild(itemElement);
+        });
+
+        const tax = subtotal * 0.16;
+        const total = subtotal + tax;
+
+        subtotalElement.textContent = `KES ${subtotal.toFixed(2)}`;
+        taxElement.textContent = `KES ${tax.toFixed(2)}`;
+        totalElement.textContent = `KES ${total.toFixed(2)}`;
+
+        // Enable/disable complete sale button based on cart items
+        completeSaleButton.disabled = cart.length === 0;
+        
+        // Update hidden inputs for form submission
+        saleItemsInput.value = JSON.stringify(cart);
+        saleTotalInput.value = total.toFixed(2);
+    }
+
+    // Event delegation for cart item buttons
+    cartItems.addEventListener('click', function(e) {
+        const target = e.target;
+        const id = target.dataset.id;
+
+        if (target.classList.contains('decrease-quantity')) {
+            const item = cart.find(item => item.id === id);
+            if (item.quantity > 1) {
+                item.quantity--;
+            } else {
+                cart.splice(cart.indexOf(item), 1);
+            }
+            updateCart();
+        } else if (target.classList.contains('increase-quantity')) {
+            const item = cart.find(item => item.id === id);
+            item.quantity++;
+            updateCart();
+        } else if (target.classList.contains('remove-item') || target.closest('.remove-item')) {
+            const item = cart.find(item => item.id === id);
+            cart.splice(cart.indexOf(item), 1);
+            updateCart();
+        }
+    });
+
+    // Clear cart
+    clearCartButton.addEventListener('click', function() {
+        cart.length = 0;
+        updateCart();
+    });
+
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        document.querySelectorAll('.product-card').forEach(card => {
+            const productName = card.dataset.name;
+            card.style.display = productName.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Form submission
+    saleForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (cart.length === 0) {
+            alert('Please add items to the cart first.');
+            return;
+        }
+
+        // Validate payment method
+        if (!paymentMethodSelect.value) {
+            alert('Please select a payment method.');
+            return;
+        }
+
+        // Update form data
+        saleItemsInput.value = JSON.stringify(cart);
+        saleTotalInput.value = totalElement.textContent.replace('KES ', '');
+
+        // Submit the form
+        this.submit();
+    });
+
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 
