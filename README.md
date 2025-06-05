@@ -1,25 +1,79 @@
 # Bakery Management System
 
-A comprehensive bakery management system built with Flask that helps manage inventory, sales, employees, and production.
+A comprehensive web-based bakery management system built with Flask that helps manage inventory, sales, employees, and production.
+
+## Live Demo
+
+Visit the live application at: [https://minibarkery.onrender.com](https://minibarkery.onrender.com)
 
 ## Features
 
-- User Authentication and Authorization
-- Inventory Management
-- Point of Sale (POS) System
-- Employee Management
-- Supplier Management
-- Production Planning
-- Financial Tracking
-- Sales Reports
-- Stock History
+### 1. User Authentication
+- Secure login system
+- User roles and permissions
+- Password protection
+- Session management
 
-## Setup Instructions
+### 2. Dashboard
+- Overview of key metrics
+- Recent sales
+- Low stock alerts
+- Daily and monthly revenue
+- Top-selling products
+
+### 3. Inventory Management
+- Track product stock levels
+- Set minimum stock levels
+- Stock history tracking
+- Low stock alerts
+- Stock adjustments
+- Export inventory reports
+
+### 4. Point of Sale (POS)
+- Quick sales processing
+- Multiple payment methods
+- Customer information tracking
+- Sales history
+- Receipt generation
+
+### 5. Employee Management
+- Employee profiles
+- Role-based access control
+- Department management
+- Salary tracking
+- Attendance tracking
+
+### 6. Supplier Management
+- Supplier profiles
+- Contact information
+- Order history
+- Payment tracking
+
+### 7. Financial Management
+- Expense tracking
+- Revenue reports
+- Payment processing
+- Financial reports
+
+### 8. Production Management
+- Recipe management
+- Production scheduling
+- Batch tracking
+- Quality control
+
+## Getting Started
+
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package manager)
+- Git
+
+### Installation
 
 1. Clone the repository:
 ```bash
-git clone <your-repository-url>
-cd bakery-management-system
+git clone https://github.com/Wasikeonesmus/MiniBarkery.git
+cd MiniBarkery
 ```
 
 2. Create and activate a virtual environment:
@@ -34,7 +88,7 @@ pip install -r requirements.txt
 ```
 
 4. Set up environment variables:
-Create a `.env` file with the following variables:
+Create a `.env` file with:
 ```
 SECRET_KEY=your-secret-key
 DATABASE_URL=sqlite:///bakery.db
@@ -56,13 +110,82 @@ The application will be available at `http://localhost:5000`
 
 ## Default Admin Credentials
 
-- Username: admin
-- Password: admin123
+- Username: `admin`
+- Password: `admin123`
 
-## Deployment
+## User Guide
 
-This application is configured for deployment on Render. The necessary files (`Procfile` and `requirements.txt`) are included in the repository.
+### 1. Login
+- Visit the login page
+- Enter your credentials
+- Click "Login"
+
+### 2. Dashboard Navigation
+- Use the sidebar menu to navigate between features
+- View key metrics and alerts
+- Access recent activities
+
+### 3. Managing Products
+- Add new products with details
+- Update stock levels
+- Set minimum stock alerts
+- View product history
+
+### 4. Processing Sales
+- Select products
+- Enter quantities
+- Choose payment method
+- Complete transaction
+- Print receipt
+
+### 5. Inventory Management
+- Monitor stock levels
+- Receive stock alerts
+- Adjust stock quantities
+- View stock history
+
+### 6. Employee Management
+- Add new employees
+- Assign roles and permissions
+- Track attendance
+- Manage salaries
+
+### 7. Financial Reports
+- View daily sales
+- Track expenses
+- Generate reports
+- Monitor revenue
+
+## Security Features
+
+- Password hashing
+- Session management
+- Role-based access control
+- Secure data storage
+- Input validation
+
+## Support
+
+For support, please:
+1. Check the documentation
+2. Open an issue on GitHub
+3. Contact the development team
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-MIT License 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Flask Framework
+- SQLAlchemy
+- Bootstrap
+- All contributors and users 
