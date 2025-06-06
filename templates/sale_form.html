@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}New Sale - Bakery Management System{% endblock %}
+
+{% block page_title %}New Sale{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Sale Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="saleForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.customer_name.label(class="form-label") }}
+                                {{ form.customer_name(class="form-control", placeholder="Walk-in Customer") }}
+                                {% if form.customer_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.customer_name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6>Items</h6>
+                    <div id="items-container">
+                        {% for item_form in form.items %}
+                        <div class="card mb-3 item-row">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ item_form.product_id.label(class="form-label") }}
+                                            {{ item_form.product_id(class="form-select") }}
+                                            {% if item_form.product_id.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item_form.product_id.errors %}
+                                                {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            {{ item_form.quantity.label(class="form-label") }}
+                                            {{ item_form.quantity(class="form-control", type="number", min="1") }}
+                                            {% if item_form.quantity.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item_form.quantity.errors %}
+                                                {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            {{ item_form.unit_price.label(class="form-label") }}
+                                            <div class="input-group">
+                                                <span class="input-group-text">KES</span>
+                                                {{ item_form.unit_price(class="form-control", type="number", step="0.01", min="0.01") }}
+                                            </div>
+                                            {% if item_form.unit_price.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in item_form.unit_price.errors %}
+                                                {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label class="form-label">&nbsp;</label>
+                                            <button type="button" class="btn btn-danger d-block w-100 remove-item">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-secondary" id="addItem">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <h5>Total: <span id="totalAmount">KES 0.00</span></h5>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const itemsContainer = document.getElementById('items-container');
+    const addItemButton = document.getElementById('addItem');
+    const totalAmountSpan = document.getElementById('totalAmount');
+    let itemCount = {{ form.items|length }};
+
+    // Function to update total amount
+    function updateTotal() {
+        let total = 0;
+        document.querySelectorAll('.item-row').forEach(row => {
+            const quantity = parseFloat(row.querySelector('input[name$="-quantity"]').value) || 0;
+            const price = parseFloat(row.querySelector('input[name$="-unit_price"]').value) || 0;
+            total += quantity * price;
+        });
+        totalAmountSpan.textContent = 'KES ' + total.toFixed(2);
+    }
+
+    // Add event listeners for quantity and price changes
+    function addItemEventListeners(row) {
+        row.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', updateTotal);
+        });
+    }
+
+    // Add event listeners to existing items
+    document.querySelectorAll('.item-row').forEach(addItemEventListeners);
+
+    // Add new item
+    addItemButton.addEventListener('click', function() {
+        const template = document.querySelector('.item-row').cloneNode(true);
+        const newIndex = itemCount++;
+        
+        // Update form field names
+        template.querySelectorAll('[name]').forEach(input => {
+            input.name = input.name.replace(/\d+/, newIndex);
+            input.value = '';
+        });
+        
+        // Add event listeners
+        addItemEventListeners(template);
+        
+        // Add to container
+        itemsContainer.appendChild(template);
+        updateTotal();
+    });
+
+    // Remove item
+    itemsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-item') || e.target.closest('.remove-item')) {
+            const row = e.target.closest('.item-row');
+            if (document.querySelectorAll('.item-row').length > 1) {
+                row.remove();
+                updateTotal();
+            } else {
+                alert('Cannot remove the last item');
+            }
+        }
+    });
+
+    // Update product price when product is selected
+    itemsContainer.addEventListener('change', function(e) {
+        if (e.target.name && e.target.name.endsWith('-product_id')) {
+            const row = e.target.closest('.item-row');
+            const productId = e.target.value;
+            const priceInput = row.querySelector('input[name$="-unit_price"]');
+            
+            // Fetch product price from server
+            fetch(`/api/products/${productId}/price`)
+                .then(response => response.json())
+                .then(data => {
+                    priceInput.value = data.price;
+                    updateTotal();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+
+    // Initial total calculation
+    updateTotal();
+});
+</script>
+{% endblock %}
+{% endblock %} 

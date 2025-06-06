@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory Management{% endblock %}
+
+{% block page_title %}Inventory Management{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5 class="card-title">Low Stock Alert</h5>
+                <p class="card-text">Items that need immediate attention</p>
+                <div class="list-group">
+                    {% for product in low_stock_products %}
+                    <div class="list-group-item list-group-item-warning">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ product.name }}</h6>
+                            <small>Stock: {{ product.stock_quantity }}</small>
+                        </div>
+                        <p class="mb-1">Minimum Level: {{ product.minimum_stock_level }}</p>
+                        <button class="btn btn-sm btn-primary" onclick="reorderProduct({{ product.id }})">
+                            Reorder Now
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title">Inventory Overview</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" onclick="exportInventory()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addStockModal">
+                            <i class="fas fa-plus"></i> Add Stock
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Current Stock</th>
+                                <th>Min Level</th>
+                                <th>Last Updated</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category }}</td>
+                                <td>{{ product.stock_quantity }}</td>
+                                <td>{{ product.minimum_stock_level }}</td>
+                                <td>{{ product.updated_at.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% if product.stock_quantity <= product.minimum_stock_level %}
+                                    <span class="badge bg-danger">Low Stock</span>
+                                    {% else %}
+                                    <span class="badge bg-success">In Stock</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="adjustStock({{ product.id }})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-info" onclick="viewHistory({{ product.id }})">
+                                        <i class="fas fa-history"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Stock Modal -->
+<div class="modal fade" id="addStockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Stock</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addStockForm">
+                    <div class="mb-3">
+                        <label class="form-label">Product</label>
+                        <select class="form-select" name="product_id" required>
+                            <option value="">Select Product</option>
+                            {% for product in products %}
+                            <option value="{{ product.id }}">{{ product.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" class="form-control" name="quantity" required min="1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitAddStock()">Add Stock</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function adjustStock(productId) {
+    // Implement stock adjustment logic
+    alert('Stock adjustment functionality will be implemented');
+}
+
+function viewHistory(productId) {
+    // Implement stock history view
+    alert('Stock history functionality will be implemented');
+}
+
+function reorderProduct(productId) {
+    // Implement reorder logic
+    alert('Reorder functionality will be implemented');
+}
+
+function exportInventory() {
+    // Implement export functionality
+    alert('Export functionality will be implemented');
+}
+
+function submitAddStock() {
+    const form = document.getElementById('addStockForm');
+    const formData = new FormData(form);
+    
+    fetch('/inventory/add-stock', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert('Error adding stock: ' + data.message);
+        }
+    });
+}
+</script>
+{% endblock %} 
