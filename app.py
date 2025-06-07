@@ -136,6 +136,9 @@ def init_db():
             )
             admin_user.set_password('adminpassword')  # Use a secure password
             db.session.add(admin_user)
+        else:
+            # If admin exists, just reset the password
+            existing_admin.set_password('adminpassword')
         
         # Commit changes
         db.session.commit()

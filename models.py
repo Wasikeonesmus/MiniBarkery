@@ -299,7 +299,7 @@ class StockAdjustment(db.Model):
     user = db.relationship('User', backref=db.backref('stock_adjustments', lazy='dynamic'))
 
     def __repr__(self):
-        return f'<StockAdjustment {self.id} - Product {self.product_id}>'
+        return f'<StockAdjustment {self.id} - {self.adjustment_type} {self.quantity}>'
 
 # Add event listeners for automatic timestamp updates
 @event.listens_for(db.Model, 'before_update')
