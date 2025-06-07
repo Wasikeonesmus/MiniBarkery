@@ -1,11 +1,10 @@
-<<<<<<< HEAD
-# Bakery Management System
+# Upendo Bakery Management System
 
 A comprehensive web-based bakery management system built with Flask that helps manage inventory, sales, employees, and production.
 
 ## Live Demo
 
-Visit the live application at: https://minibarkery.onrender.com
+Visit the live application at: https://upendo-bakery.onrender.com
 
 ## Features
 
@@ -65,7 +64,7 @@ Visit the live application at: https://minibarkery.onrender.com
 ## Getting Started
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.13 or higher
 - pip (Python package manager)
 - Git
 
@@ -73,8 +72,8 @@ Visit the live application at: https://minibarkery.onrender.com
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Wasikeonesmus/MiniBarkery.git
-cd MiniBarkery
+git clone https://github.com/Wasikeonesmus/Upendo_bakery.git
+cd Upendo_bakery
 ```
 
 2. Create and activate a virtual environment:
@@ -97,9 +96,7 @@ DATABASE_URL=sqlite:///bakery.db
 
 5. Initialize the database:
 ```bash
-flask db init
-flask db migrate
-flask db upgrade
+python run.py
 ```
 
 6. Run the application:
@@ -163,31 +160,9 @@ The application will be available at http://localhost:5000
 - Secure data storage
 - Input validation
 
-## Support
-For support, please:
-- Check the documentation
-- Open an issue on GitHub
-- Contact the development team
-
-## Contributing
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-- Flask Framework
-- SQLAlchemy
-- Bootstrap
-- All contributors and users
-
 ## Running Tests
 
-To run the unit tests for the Barkery System, follow these steps:
+To run the unit tests for the Upendo Bakery System, follow these steps:
 
 1. Ensure you have a virtual environment activated:
 ```bash
@@ -210,19 +185,24 @@ coverage run -m pytest tests/
 coverage report
 ```
 
-### Test Coverage
+## Support
+For support, please:
+- Check the documentation
+- Open an issue on GitHub
+- Contact the development team
 
-The test suite covers:
-- Model creation and validation
-- Route functionality
-- Basic CRUD operations
+## Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-### Adding New Tests
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-- Add new test cases in the `tests/` directory
-- Follow the existing test structure
-- Ensure each test method starts with `test_`
-- Use `setUp()` and `tearDown()` for test initialization and cleanup
-=======
-# Upendo_bakery
->>>>>>> 29589ccdf72a450c57090a231850733fa4746486
+## Acknowledgments
+- Flask Framework
+- SQLAlchemy
+- Bootstrap
+- All contributors and users

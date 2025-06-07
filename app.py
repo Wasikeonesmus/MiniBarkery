@@ -29,6 +29,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import uuid
+from sqlalchemy.exc import IntegrityError
 
 # Logging Configuration
 import logging
@@ -117,34 +118,50 @@ def load_user(user_id):
         return None
 
 def init_db():
-    """Initialize the database with default data."""
+    """
+    Initialize the database with default data.
+    Handles potential duplicate entries and provides robust error handling.
+    """
     try:
-        # Drop all existing tables (use with caution in production)
-        db.drop_all()
-        
-        # Create all tables
+        # Ensure database tables are created
         db.create_all()
-        
+
         # Check if admin user already exists
-        existing_admin = User.query.filter_by(email='admin@example.com').first()
+        existing_admin = User.query.filter_by(username='admin').first()
         
         if not existing_admin:
-            # Create admin user if not exists
+            # Generate a secure random password
+            import secrets
+            admin_password = secrets.token_hex(16)  # 32-character random password
+            hashed_password = generate_password_hash(admin_password)
+
+            # Create admin user with unique constraints in mind
             admin_user = User(
                 username='admin', 
                 email='admin@example.com', 
+                password_hash=hashed_password,
                 is_active=True
             )
-            admin_user.set_password('adminpassword')  # Use a secure password
-            db.session.add(admin_user)
-        
-        # Commit changes
+            
+            # Add and commit within a try-except block
+            try:
+                db.session.add(admin_user)
+                db.session.commit()
+                logger.info("Admin user created successfully")
+                logger.info(f"Admin password (store securely): {admin_password}")
+            except IntegrityError:
+                db.session.rollback()
+                logger.warning("Admin user could not be created due to integrity constraint")
+        else:
+            logger.info("Admin user already exists")
+
+        # Commit any remaining changes
         db.session.commit()
-        
-        logger.info("Database initialized successfully")
+        logger.info("Database initialization complete")
+
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error initializing database: {str(e)}")
+        logger.error(f"Critical error during database initialization: {str(e)}")
         raise
 
 @app.route('/login', methods=['GET', 'POST'])
