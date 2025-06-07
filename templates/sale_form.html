@@ -1,111 +1,78 @@
 {% extends "base.html" %}
 
-{% block title %}New Sale - Bakery Management System{% endblock %}
+{% block title %}{% if sale %}Edit Sale{% else %}New Sale{% endif %}{% endblock %}
 
-{% block page_title %}New Sale{% endblock %}
+{% block page_title %}{% if sale %}Edit Sale{% else %}New Sale{% endif %}{% endblock %}
 
 {% block content %}
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-12 col-md-8 offset-md-2">
         <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Sale Details</h5>
-            </div>
             <div class="card-body">
-                <form method="POST" id="saleForm">
-                    {{ form.hidden_tag() }}
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                {{ form.customer_name.label(class="form-label") }}
-                                {{ form.customer_name(class="form-control", placeholder="Walk-in Customer") }}
-                                {% if form.customer_name.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {% for error in form.customer_name.errors %}
-                                    {{ error }}
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
+                <form method="POST">
+                    {{ form.csrf_token }}
+                    <div class="mb-3">
+                        <label class="form-label">Customer Name</label>
+                        {{ form.customer_name(class="form-control") }}
+                        {% if form.customer_name.errors %}
+                            {% for error in form.customer_name.errors %}
+                                <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
                     </div>
 
-                    <h6>Items</h6>
-                    <div id="items-container">
+                    <div id="sale-items">
                         {% for item_form in form.items %}
-                        <div class="card mb-3 item-row">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            {{ item_form.product_id.label(class="form-label") }}
-                                            {{ item_form.product_id(class="form-select") }}
-                                            {% if item_form.product_id.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in item_form.product_id.errors %}
-                                                {{ error }}
-                                                {% endfor %}
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="mb-3">
-                                            {{ item_form.quantity.label(class="form-label") }}
-                                            {{ item_form.quantity(class="form-control", type="number", min="1") }}
-                                            {% if item_form.quantity.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in item_form.quantity.errors %}
-                                                {{ error }}
-                                                {% endfor %}
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="mb-3">
-                                            {{ item_form.unit_price.label(class="form-label") }}
-                                            <div class="input-group">
-                                                <span class="input-group-text">KES</span>
-                                                {{ item_form.unit_price(class="form-control", type="number", step="0.01", min="0.01") }}
-                                            </div>
-                                            {% if item_form.unit_price.errors %}
-                                            <div class="invalid-feedback d-block">
-                                                {% for error in item_form.unit_price.errors %}
-                                                {{ error }}
-                                                {% endfor %}
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <div class="mb-3">
-                                            <label class="form-label">&nbsp;</label>
-                                            <button type="button" class="btn btn-danger d-block w-100 remove-item">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
+                        <div class="sale-item-row mb-3 p-3 border rounded">
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label">Product</label>
+                                    {{ item_form.product_id(class="form-control product-select") }}
+                                    {% if item_form.product_id.errors %}
+                                        {% for error in item_form.product_id.errors %}
+                                            <span class="text-danger">{{ error }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label">Quantity</label>
+                                    {{ item_form.quantity(class="form-control quantity-input", type="number", min="1") }}
+                                    {% if item_form.quantity.errors %}
+                                        {% for error in item_form.quantity.errors %}
+                                            <span class="text-danger">{{ error }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <label class="form-label">Unit Price</label>
+                                    {{ item_form.unit_price(class="form-control price-input", type="number", step="0.01", min="0") }}
+                                    {% if item_form.unit_price.errors %}
+                                        {% for error in item_form.unit_price.errors %}
+                                            <span class="text-danger">{{ error }}</span>
+                                        {% endfor %}
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
 
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <button type="button" class="btn btn-secondary" id="addItem">
-                                <i class="fas fa-plus"></i> Add Item
-                            </button>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <h5>Total: <span id="totalAmount">KES 0.00</span></h5>
-                        </div>
+                    <div class="mb-3">
+                        <button type="button" id="add-sale-item" class="btn btn-secondary">
+                            <i class="fas fa-plus"></i> Add Item
+                        </button>
                     </div>
 
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-primary") }}
+                    <div class="mb-3">
+                        <label class="form-label">Total Amount</label>
+                        <input type="text" id="total-amount" class="form-control" readonly>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('sale_list') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if sale %}Update Sale{% else %}Create Sale{% endif %}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -113,88 +80,62 @@
     </div>
 </div>
 
-{% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const itemsContainer = document.getElementById('items-container');
-    const addItemButton = document.getElementById('addItem');
-    const totalAmountSpan = document.getElementById('totalAmount');
-    let itemCount = {{ form.items|length }};
+    const saleItemsContainer = document.getElementById('sale-items');
+    const addItemButton = document.getElementById('add-sale-item');
+    const totalAmountInput = document.getElementById('total-amount');
+    const productSelects = document.querySelectorAll('.product-select');
 
-    // Function to update total amount
-    function updateTotal() {
+    function calculateTotalAmount() {
         let total = 0;
-        document.querySelectorAll('.item-row').forEach(row => {
-            const quantity = parseFloat(row.querySelector('input[name$="-quantity"]').value) || 0;
-            const price = parseFloat(row.querySelector('input[name$="-unit_price"]').value) || 0;
+        const saleItemRows = document.querySelectorAll('.sale-item-row');
+        saleItemRows.forEach(row => {
+            const quantityInput = row.querySelector('.quantity-input');
+            const priceInput = row.querySelector('.price-input');
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const price = parseFloat(priceInput.value) || 0;
             total += quantity * price;
         });
-        totalAmountSpan.textContent = 'KES ' + total.toFixed(2);
+        totalAmountInput.value = total.toFixed(2);
     }
 
-    // Add event listeners for quantity and price changes
-    function addItemEventListeners(row) {
-        row.querySelectorAll('input[type="number"]').forEach(input => {
-            input.addEventListener('input', updateTotal);
-        });
-    }
+    // Add event listeners to calculate total amount
+    saleItemsContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('quantity-input') || 
+            e.target.classList.contains('price-input')) {
+            calculateTotalAmount();
+        }
+    });
 
-    // Add event listeners to existing items
-    document.querySelectorAll('.item-row').forEach(addItemEventListeners);
-
-    // Add new item
+    // Add new sale item dynamically
     addItemButton.addEventListener('click', function() {
-        const template = document.querySelector('.item-row').cloneNode(true);
-        const newIndex = itemCount++;
-        
-        // Update form field names
-        template.querySelectorAll('[name]').forEach(input => {
-            input.name = input.name.replace(/\d+/, newIndex);
-            input.value = '';
-        });
-        
-        // Add event listeners
-        addItemEventListeners(template);
-        
-        // Add to container
-        itemsContainer.appendChild(template);
-        updateTotal();
+        const newItemIndex = saleItemsContainer.children.length;
+        const newItemRow = document.createElement('div');
+        newItemRow.classList.add('sale-item-row', 'mb-3', 'p-3', 'border', 'rounded');
+        newItemRow.innerHTML = `
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">Product</label>
+                    <select name="items-${newItemIndex}-product_id" class="form-control product-select" required>
+                        ${productSelects[0].innerHTML}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" name="items-${newItemIndex}-quantity" class="form-control quantity-input" min="1" required>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="form-label">Unit Price</label>
+                    <input type="number" name="items-${newItemIndex}-unit_price" class="form-control price-input" step="0.01" min="0" required>
+                </div>
+            </div>
+        `;
+        saleItemsContainer.appendChild(newItemRow);
     });
 
-    // Remove item
-    itemsContainer.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-item') || e.target.closest('.remove-item')) {
-            const row = e.target.closest('.item-row');
-            if (document.querySelectorAll('.item-row').length > 1) {
-                row.remove();
-                updateTotal();
-            } else {
-                alert('Cannot remove the last item');
-            }
-        }
-    });
-
-    // Update product price when product is selected
-    itemsContainer.addEventListener('change', function(e) {
-        if (e.target.name && e.target.name.endsWith('-product_id')) {
-            const row = e.target.closest('.item-row');
-            const productId = e.target.value;
-            const priceInput = row.querySelector('input[name$="-unit_price"]');
-            
-            // Fetch product price from server
-            fetch(`/api/products/${productId}/price`)
-                .then(response => response.json())
-                .then(data => {
-                    priceInput.value = data.price;
-                    updateTotal();
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    });
-
-    // Initial total calculation
-    updateTotal();
+    // Initial total amount calculation
+    calculateTotalAmount();
 });
 </script>
-{% endblock %}
 {% endblock %} 

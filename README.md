@@ -4,7 +4,7 @@ A comprehensive web-based bakery management system built with Flask that helps m
 
 ## Live Demo
 
-Visit the live application at: [https://minibarkery.onrender.com](https://minibarkery.onrender.com)
+Visit the live application at: https://minibarkery.onrender.com
 
 ## Features
 
@@ -106,12 +106,11 @@ flask db upgrade
 python app.py
 ```
 
-The application will be available at `http://localhost:5000`
+The application will be available at http://localhost:5000
 
-## Default Admin Credentials
-
-- Username: `admin`
-- Password: `admin123`
+### Default Admin Credentials
+- Username: admin
+- Password: admin123
 
 ## User Guide
 
@@ -157,7 +156,6 @@ The application will be available at `http://localhost:5000`
 - Monitor revenue
 
 ## Security Features
-
 - Password hashing
 - Session management
 - Role-based access control
@@ -165,14 +163,12 @@ The application will be available at `http://localhost:5000`
 - Input validation
 
 ## Support
-
 For support, please:
-1. Check the documentation
-2. Open an issue on GitHub
-3. Contact the development team
+- Check the documentation
+- Open an issue on GitHub
+- Contact the development team
 
 ## Contributing
-
 1. Fork the repository
 2. Create a feature branch
 3. Commit your changes
@@ -180,12 +176,49 @@ For support, please:
 5. Create a Pull Request
 
 ## License
-
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
-
 - Flask Framework
 - SQLAlchemy
 - Bootstrap
 - All contributors and users
+
+## Running Tests
+
+To run the unit tests for the Barkery System, follow these steps:
+
+1. Ensure you have a virtual environment activated:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+```
+
+2. Install the required dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Run the tests using pytest:
+```bash
+# Run all tests
+pytest tests/
+
+# Run tests with coverage report
+coverage run -m pytest tests/
+coverage report
+```
+
+### Test Coverage
+
+The test suite covers:
+- Model creation and validation
+- Route functionality
+- Basic CRUD operations
+
+### Adding New Tests
+
+- Add new test cases in the `tests/` directory
+- Follow the existing test structure
+- Ensure each test method starts with `test_`
+- Use `setUp()` and `tearDown()` for test initialization and cleanup

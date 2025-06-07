@@ -239,6 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
     saleForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
+        // Validate cart is not empty
         if (cart.length === 0) {
             alert('Please add items to the cart first.');
             return;
@@ -250,12 +251,42 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Update form data
-        saleItemsInput.value = JSON.stringify(cart);
-        saleTotalInput.value = totalElement.textContent.replace('KES ', '');
+        // Prepare sale data
+        const saleData = {
+            items: cart.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity
+            })),
+            total_amount: parseFloat(totalElement.textContent.replace('KES ', '')),
+            customer_name: document.getElementById('customerName').value || '',
+            payment_method: paymentMethodSelect.value
+        };
 
-        // Submit the form
-        this.submit();
+        // Convert sale data to form data for submission
+        const formData = new FormData(saleForm);
+        formData.set('items', JSON.stringify(saleData.items));
+        formData.set('total_amount', saleData.total_amount.toFixed(2));
+        formData.set('customer_name', saleData.customer_name);
+        formData.set('payment_method', saleData.payment_method);
+
+        // Submit form via fetch to handle potential errors
+        fetch(saleForm.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Sale processing failed');
+            }
+            // Redirect or reload page
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error processing sale. Please try again.');
+        });
     });
 
     // Initialize tooltips

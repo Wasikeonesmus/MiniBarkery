@@ -5,38 +5,17 @@
 {% block page_title %}Welcome{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 offset-md-2 text-center">
-            <h1 class="display-4 mb-4">Welcome to Bakery Management System</h1>
-            <p class="lead mb-4">A comprehensive solution for managing your bakery operations</p>
-            
-            <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
-        </div>
-    </div>
-    
-    <div class="row mt-5">
-        <div class="col-md-4">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
             <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Inventory Management</h5>
-                    <p class="card-text">Track your ingredients, manage stock levels, and monitor product inventory.</p>
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Welcome to the Bakery Management System</h4>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Sales & POS</h5>
-                    <p class="card-text">Process sales, manage transactions, and track daily revenue.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Production Planning</h5>
-                    <p class="card-text">Manage recipes, plan production batches, and track manufacturing.</p>
+                    <h5 class="card-title">Get Started</h5>
+                    <p class="card-text">Please login to access the system.</p>
+                    <a href="{{ url_for('login') }}" class="btn btn-primary">Login</a>
                 </div>
             </div>
         </div>

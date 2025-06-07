@@ -1,11 +1,9 @@
-from flask_sqlalchemy import SQLAlchemy
+from extensions import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
-from sqlalchemy import event
+from sqlalchemy import event, Index
 from sqlalchemy.orm import validates
-
-db = SQLAlchemy()
 
 def get_current_time():
     return datetime.now(timezone.utc)
@@ -15,8 +13,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
-    is_admin = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=get_current_time)
+    last_login = db.Column(db.DateTime)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -29,6 +28,9 @@ class User(UserMixin, db.Model):
         if not '@' in email:
             raise ValueError('Invalid email address')
         return email
+
+    def __repr__(self):
+        return f'<User {self.username}>'
 
 class Supplier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,17 +54,18 @@ class Supplier(db.Model):
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, index=True)
     description = db.Column(db.Text)
-    price = db.Column(db.Float, nullable=False)
-    category = db.Column(db.String(50))
-    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
-    stock_quantity = db.Column(db.Integer, default=0)
+    price = db.Column(db.Float, nullable=False, index=True)
+    category = db.Column(db.String(50), index=True)
+    unit = db.Column(db.String(20), nullable=False)
+    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), index=True)
+    stock_quantity = db.Column(db.Integer, default=0, index=True)
     minimum_stock_level = db.Column(db.Integer, default=10)
     reorder_quantity = db.Column(db.Integer, default=20)
     image_path = db.Column(db.String(200))
-    is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=get_current_time)
+    is_active = db.Column(db.Boolean, default=True, index=True)
+    created_at = db.Column(db.DateTime, default=get_current_time, index=True)
     updated_at = db.Column(db.DateTime, default=get_current_time, onupdate=get_current_time)
 
     supplier = db.relationship('Supplier', backref='products', lazy=True)
@@ -88,20 +91,14 @@ class Product(db.Model):
 class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_name = db.Column(db.String(100))
-    sale_date = db.Column(db.DateTime, default=get_current_time)
-    payment_method = db.Column(db.String(50))
-    total_amount = db.Column(db.Float, default=0)
-    payment_status = db.Column(db.String(20), default='pending')  # pending, partial, completed
+    total_amount = db.Column(db.Float, nullable=False)
+    payment_method = db.Column(db.String(20), default='cash')
+    payment_status = db.Column(db.String(20), default='completed')
+    sale_date = db.Column(db.DateTime, default=get_current_time, index=True)
     created_at = db.Column(db.DateTime, default=get_current_time)
+    updated_at = db.Column(db.DateTime, default=get_current_time, onupdate=get_current_time)
 
     items = db.relationship('SaleItem', backref='sale', lazy=True, cascade='all, delete-orphan')
-    payments = db.relationship('Payment', backref='sale', lazy=True, cascade='all, delete-orphan')
-
-    @validates('total_amount')
-    def validate_total_amount(self, key, value):
-        if value < 0:
-            raise ValueError('Total amount cannot be negative')
-        return value
 
     def __repr__(self):
         return f'<Sale {self.id}>'
@@ -113,8 +110,9 @@ class SaleItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     unit_price = db.Column(db.Float, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
+    created_at = db.Column(db.DateTime, default=get_current_time)
 
-    product = db.relationship('Product', backref='sale_items')
+    product = db.relationship('Product', backref='sale_items', lazy=True)
 
     @validates('quantity', 'unit_price', 'total_price')
     def validate_values(self, key, value):
@@ -254,23 +252,32 @@ class StockHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    type = db.Column(db.String(20), nullable=False)  # 'addition', 'adjustment', 'sale', 'production'
+    type = db.Column(db.String(20), nullable=False)  # 'addition', 'subtraction', 'sale'
     notes = db.Column(db.Text)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=get_current_time)
-    
-    product = db.relationship('Product', backref=db.backref('stock_history', lazy=True))
-    user = db.relationship('User', backref=db.backref('stock_operations', lazy=True))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_at = db.Column(db.DateTime, default=get_current_time, index=True)
+
+    product = db.relationship('Product', backref='stock_history', lazy=True)
+    user = db.relationship('User', backref='stock_history', lazy=True)
+
+    @validates('quantity')
+    def validate_quantity(self, key, value):
+        if value == 0:
+            raise ValueError('Quantity cannot be zero')
+        return value
+
+    def __repr__(self):
+        return f'<StockHistory {self.id}>'
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    sale_id = db.Column(db.Integer, db.ForeignKey('sale.id'), nullable=False)
+    sale_id = db.Column(db.Integer, db.ForeignKey('sale.id'), nullable=False, index=True)
     amount = db.Column(db.Float, nullable=False)
-    payment_method = db.Column(db.String(50), nullable=False)  # cash, mpesa, card
-    transaction_id = db.Column(db.String(100))  # For mpesa/card transactions
-    payment_date = db.Column(db.DateTime, default=get_current_time)
-    status = db.Column(db.String(20), default='pending')  # pending, completed, failed
-    created_at = db.Column(db.DateTime, default=get_current_time)
+    payment_method = db.Column(db.String(50), nullable=False, index=True)
+    transaction_id = db.Column(db.String(100), index=True)
+    payment_date = db.Column(db.DateTime, default=get_current_time, index=True)
+    status = db.Column(db.String(20), default='pending', index=True)
+    created_at = db.Column(db.DateTime, default=get_current_time, index=True)
     updated_at = db.Column(db.DateTime, default=get_current_time, onupdate=get_current_time)
 
     def __repr__(self):
@@ -281,6 +288,12 @@ class Payment(db.Model):
 def receive_before_update(mapper, connection, target):
     if hasattr(target, 'updated_at'):
         target.updated_at = get_current_time()
+
+# Add composite indexes for common queries
+Index('idx_sale_date_status', Sale.sale_date, Sale.payment_status)
+Index('idx_product_category_active', Product.category, Product.is_active)
+Index('idx_stock_history_product_date', StockHistory.product_id, StockHistory.created_at)
+Index('idx_payment_sale_date', Payment.sale_id, Payment.payment_date)
 
 if __name__ == '__main__':
     # This is for testing the models

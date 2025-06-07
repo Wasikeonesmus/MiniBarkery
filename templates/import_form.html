@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Import {{ type|title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Import {{ type|title }}</h3>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading">Download Template</h5>
+                        <p class="mb-0">Download a sample template to see the required format:</p>
+                        <a href="{{ url_for('download_template', type=type) }}" class="btn btn-info btn-sm mt-2">
+                            <i class="fas fa-download me-2"></i>Download Template
+                        </a>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group mb-3">
+                            {{ form.file.label(class="form-label") }}
+                            {{ form.file(class="form-control") }}
+                            {% for error in form.file.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                            {% if type == 'suppliers' %}
+                                <a href="{{ url_for('supplier_list') }}" class="btn btn-secondary btn-lg">
+                            {% elif type == 'products' %}
+                                <a href="{{ url_for('product_list') }}" class="btn btn-secondary btn-lg">
+                            {% elif type == 'inventory' %}
+                                <a href="{{ url_for('inventory_list') }}" class="btn btn-secondary btn-lg">
+                            {% endif %}
+                                Back to {{ type|title }} List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Bakery System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body text-center">
+                <h1 class="display-4 mb-4">Welcome to Bakery System</h1>
+                <p class="lead">Your complete solution for bakery management</p>
+                {% if not current_user.is_authenticated %}
+                    <div class="mt-4">
+                        <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Login to Continue</a>
+                    </div>
+                {% else %}
+                    <div class="mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">Go to Dashboard</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

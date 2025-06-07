@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}New Stock Entry{% endblock %}
+
+{% block page_title %}New Stock Entry{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('new_inventory') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="mb-3">
+                        <label for="product_id" class="form-label">Product</label>
+                        <select class="form-select form-select-lg" id="product_id" name="product_id" required>
+                            <option value="">Select a product</option>
+                            {% for product in products %}
+                            <option value="{{ product.id }}">{{ product.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control form-control-lg" id="quantity" name="quantity" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Type</label>
+                        <select class="form-select form-select-lg" id="type" name="type" required>
+                            <option value="in">Stock In</option>
+                            <option value="out">Stock Out</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reference" class="form-label">Reference</label>
+                        <input type="text" class="form-control form-control-lg" id="reference" name="reference">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control form-control-lg" id="date" name="date" value="{{ today }}">
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> Save Stock Entry
+                        </button>
+                        <a href="{{ url_for('inventory_list') }}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,12 +1,10 @@
-<<<<<<< HEAD
- 
-=======
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Bakery Management System{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}Bakery System{% endblock %}</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -24,25 +22,23 @@
             display: flex;
             flex-direction: column;
             background-color: #f5f5f5;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            font-size: 16px;
+            line-height: 1.6;
         }
 
         .navbar {
-            background-color: var(--primary-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: #343a40;
         }
 
         .navbar-brand {
-            font-weight: bold;
-            color: white !important;
+            color: #fff !important;
         }
 
         .nav-link {
-            color: rgba(255,255,255,0.9) !important;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: white !important;
+            color: #fff !important;
         }
 
         .main-content {
@@ -81,6 +77,8 @@
         .table-responsive {
             border-radius: 10px;
             overflow: hidden;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .table th {
@@ -124,6 +122,16 @@
 
             .nav-link {
                 padding: 8px 15px;
+            }
+
+            .form-control {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+
+            .modal-dialog {
+                margin: 1.75rem 0.5rem;
+                max-width: none;
+                width: calc(100% - 1rem);
             }
         }
 
@@ -188,90 +196,119 @@
                 max-width: none;
             }
         }
+
+        .sidebar {
+            min-height: 100vh;
+            background-color: #343a40;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .sidebar .active {
+            background-color: #0d6efd;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .quick-actions {
+            margin-bottom: 20px;
+        }
+        .summary-card {
+            text-align: center;
+            padding: 20px;
+        }
+        .summary-card i {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        /* Navigation adjustments */
+        .navbar-toggler {
+            padding: 0.25rem 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        /* Ensure full-width on small screens */
+        .container-fluid, .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
-                <i class="fas fa-bread-slice me-2"></i>Bakery System
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('dashboard') }}">
-                            <i class="fas fa-home me-1"></i>Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('product_list') }}">
-                            <i class="fas fa-box me-1"></i>Products
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('pos') }}">
-                            <i class="fas fa-shopping-cart me-1"></i>Sales
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('employee_list') }}">
-                            <i class="fas fa-users me-1"></i>Employees
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('supplier_list') }}">
-                            <i class="fas fa-truck me-1"></i>Suppliers
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    {% if current_user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i>{{ current_user.username }}
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('logout', next=request.path) }}">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login') }}">
-                                <i class="fas fa-sign-in-alt me-1"></i>Login
-                            </a>
-                        </li>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <h3 class="text-white text-center mb-4">Bakery System</h3>
+                <nav>
+                    <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('pos') }}" class="{% if request.endpoint == 'pos' %}active{% endif %}">
+                        <i class="fas fa-cash-register"></i> POS
+                    </a>
+                    <a href="{{ url_for('inventory') }}" class="{% if request.endpoint == 'inventory' %}active{% endif %}">
+                        <i class="fas fa-boxes"></i> Inventory
+                    </a>
+                    <a href="{{ url_for('production') }}" class="{% if request.endpoint == 'production' %}active{% endif %}">
+                        <i class="fas fa-industry"></i> Production
+                    </a>
+                    <a href="{{ url_for('financial') }}" class="{% if request.endpoint == 'financial' %}active{% endif %}">
+                        <i class="fas fa-chart-line"></i> Financial
+                    </a>
+                    <a href="{{ url_for('employee_list') }}" class="{% if request.endpoint == 'employee_list' %}active{% endif %}">
+                        <i class="fas fa-users"></i> Employees
+                    </a>
+                    <a href="{{ url_for('supplier_list') }}" class="{% if request.endpoint == 'supplier_list' %}active{% endif %}">
+                        <i class="fas fa-truck"></i> Suppliers
+                    </a>
+                    <a href="{{ url_for('sale_list') }}" class="{% if request.endpoint == 'sale_list' %}active{% endif %}">
+                        <i class="fas fa-receipt"></i> Sales
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="mt-5">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                {% block page_title %}{% endblock %}
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="toast-container">
+                            {% for category, message in messages %}
+                                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="toast-header {% if category == 'error' %}bg-danger text-white{% elif category == 'success' %}bg-success text-white{% endif %}">
+                                        <strong class="me-auto">{% if category == 'error' %}Error{% elif category == 'success' %}Success{% else %}Notification{% endif %}</strong>
+                                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                    </div>
+                                    <div class="toast-body">
+                                        {{ message }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% endif %}
-                </ul>
+                {% endwith %}
+
+                {% block content %}{% endblock %}
             </div>
         </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-            
-            {% block content %}{% endblock %}
-        </div>
-    </main>
+    </div>
 
     <!-- Loading Spinner -->
     <div class="loading-spinner">
@@ -280,14 +317,10 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div class="toast-container"></div>
-
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
     <!-- Custom JavaScript -->
     <script>
         // Show loading spinner
@@ -300,89 +333,59 @@
             document.querySelector('.loading-spinner').style.display = 'none';
         }
 
-        // Show toast notification
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-white bg-${type} border-0`;
-            toast.setAttribute('role', 'alert');
-            toast.setAttribute('aria-live', 'assertive');
-            toast.setAttribute('aria-atomic', 'true');
-            
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
-            
-            document.querySelector('.toast-container').appendChild(toast);
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-            
-            // Remove toast after it's hidden
-            toast.addEventListener('hidden.bs.toast', () => {
-                toast.remove();
-            });
-        }
+        // Auto-hide toasts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var toasts = document.querySelectorAll('.toast');
+                toasts.forEach(function(toast) {
+                    var bsToast = new bootstrap.Toast(toast);
+                    bsToast.hide();
+                });
+            }, 5000);
+        });
 
         // Add loading spinner to all forms
-        document.addEventListener('DOMContentLoaded', function() {
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function() {
-                    showLoading();
-                });
-            });
-
-            // Initialize all tooltips
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-
-            // Initialize all popovers
-            const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-            popoverTriggerList.map(function (popoverTriggerEl) {
-                return new bootstrap.Popover(popoverTriggerEl);
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function() {
+                showLoading();
             });
         });
 
-        // Handle AJAX form submissions
-        document.addEventListener('DOMContentLoaded', function() {
-            const ajaxForms = document.querySelectorAll('form[data-ajax="true"]');
-            ajaxForms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    showLoading();
-                    
-                    const formData = new FormData(form);
-                    fetch(form.action, {
-                        method: form.method,
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        hideLoading();
-                        if (data.success) {
-                            showToast(data.message, 'success');
-                            if (data.redirect) {
-                                window.location.href = data.redirect;
-                            }
-                        } else {
-                            showToast(data.message, 'danger');
-                        }
-                    })
-                    .catch(error => {
-                        hideLoading();
-                        showToast('An error occurred. Please try again.', 'danger');
-                    });
-                });
-            });
+        // Add CSRF token to all AJAX requests
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", $('meta[name="csrf-token"]').attr('content'));
+                }
+            }
         });
     </script>
-    {% block extra_js %}{% endblock %}
+    
+    <!-- Custom global scripts -->
+    <script>
+        // Global CSRF token setup for fetch requests
+        document.addEventListener('DOMContentLoaded', function() {
+            var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            // Modify fetch to include CSRF token by default
+            var originalFetch = window.fetch;
+            window.fetch = function() {
+                var args = arguments;
+                var fetchOptions = args[1] || {};
+                
+                // Only modify if it's a POST, PUT, DELETE, or PATCH request
+                if (fetchOptions.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(fetchOptions.method.toUpperCase())) {
+                    fetchOptions.headers = fetchOptions.headers || {};
+                    fetchOptions.headers['X-CSRFToken'] = csrfToken;
+                    args[1] = fetchOptions;
+                }
+                
+                return originalFetch.apply(this, args);
+            };
+        });
+    </script>
+    
+    <!-- Page-specific scripts -->
+    {% block scripts %}{% endblock %}
 </body>
-</html> 
->>>>>>> origin/main
+</html>

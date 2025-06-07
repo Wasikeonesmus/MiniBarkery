@@ -1,75 +1,54 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}New Supplier{% endblock %}
 
-{% block page_title %}{{ title }}{% endblock %}
+{% block page_title %}New Supplier{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 offset-md-2">
+<div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="">
-                    {{ form.hidden_tag() }}
+                <form method="POST" action="{{ url_for('new_supplier') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     
                     <div class="mb-3">
-                        {{ form.name.label(class="form-label") }}
-                        {{ form.name(class="form-control") }}
-                        {% if form.name.errors %}
-                            {% for error in form.name.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control form-control-lg" id="name" name="name" required>
                     </div>
 
                     <div class="mb-3">
-                        {{ form.contact_person.label(class="form-label") }}
-                        {{ form.contact_person(class="form-control") }}
-                        {% if form.contact_person.errors %}
-                            {% for error in form.contact_person.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
+                        <label for="contact_person" class="form-label">Contact Person</label>
+                        <input type="text" class="form-control form-control-lg" id="contact_person" name="contact_person">
                     </div>
 
                     <div class="mb-3">
-                        {{ form.phone.label(class="form-label") }}
-                        {{ form.phone(class="form-control") }}
-                        {% if form.phone.errors %}
-                            {% for error in form.phone.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="tel" class="form-control form-control-lg" id="phone" name="phone">
                     </div>
 
                     <div class="mb-3">
-                        {{ form.email.label(class="form-label") }}
-                        {{ form.email(class="form-control") }}
-                        {% if form.email.errors %}
-                            {% for error in form.email.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control form-control-lg" id="email" name="email">
                     </div>
 
                     <div class="mb-3">
-                        {{ form.address.label(class="form-label") }}
-                        {{ form.address(class="form-control", rows=3) }}
-                        {% if form.address.errors %}
-                            {% for error in form.address.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control form-control-lg" id="address" name="address" rows="3"></textarea>
                     </div>
 
                     <div class="mb-3 form-check">
-                        {{ form.is_active(class="form-check-input") }}
-                        {{ form.is_active.label(class="form-check-label") }}
+                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" checked>
+                        <label class="form-check-label" for="is_active">Active</label>
                     </div>
 
                     <div class="d-grid gap-2">
-                        {{ form.submit(class="btn btn-primary") }}
-                        <a href="{{ url_for('supplier_list') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> Save Supplier
+                        </button>
+                        <a href="{{ url_for('supplier_list') }}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
                     </div>
                 </form>
             </div>

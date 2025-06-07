@@ -6,15 +6,20 @@
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSupplierModal">
-            <i class="fas fa-plus"></i> Add New Supplier
-        </button>
+    <div class="col-12">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{{ url_for('import_data', type='suppliers') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-file-import"></i> Import Suppliers
+            </a>
+            <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addSupplierModal">
+                <i class="fas fa-plus"></i> Add Supplier
+            </button>
+        </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col">
+    <div class="col-12">
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
@@ -44,15 +49,17 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('supplier_detail', id=supplier.id) }}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ url_for('edit_supplier', id=supplier.id) }}" class="btn btn-sm btn-warning">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteSupplier({{ supplier.id }})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('supplier_detail', id=supplier.id) }}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('edit_supplier', id=supplier.id) }}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteSupplier({{ supplier.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -65,70 +72,51 @@
 </div>
 
 <!-- Add Supplier Modal -->
-<div class="modal fade" id="addSupplierModal" tabindex="-1">
-    <div class="modal-dialog">
+<div class="modal fade" id="addSupplierModal" tabindex="-1" aria-labelledby="addSupplierModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add New Supplier</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="addSupplierModalLabel">Add New Supplier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="{{ url_for('new_supplier') }}">
-                    {{ form.csrf_token }}
+                <form method="POST" action="{{ url_for('new_supplier') }}" id="addSupplierForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
                     <div class="mb-3">
-                        <label class="form-label">Name</label>
-                        {{ form.name(class="form-control") }}
-                        {% if form.name.errors %}
-                            {% for error in form.name.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control form-control-lg" id="name" name="name" required>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Contact Person</label>
-                        {{ form.contact_person(class="form-control") }}
-                        {% if form.contact_person.errors %}
-                            {% for error in form.contact_person.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
+                        <label for="contact_person" class="form-label">Contact Person</label>
+                        <input type="text" class="form-control form-control-lg" id="contact_person" name="contact_person">
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Phone</label>
-                        {{ form.phone(class="form-control") }}
-                        {% if form.phone.errors %}
-                            {% for error in form.phone.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="tel" class="form-control form-control-lg" id="phone" name="phone">
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        {{ form.email(class="form-control") }}
-                        {% if form.email.errors %}
-                            {% for error in form.email.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control form-control-lg" id="email" name="email">
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Address</label>
-                        {{ form.address(class="form-control", rows=3) }}
-                        {% if form.address.errors %}
-                            {% for error in form.address.errors %}
-                                <span class="text-danger">{{ error }}</span>
-                            {% endfor %}
-                        {% endif %}
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control form-control-lg" id="address" name="address" rows="3"></textarea>
                     </div>
+
                     <div class="mb-3 form-check">
-                        {{ form.is_active(class="form-check-input") }}
-                        <label class="form-check-label">Active</label>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Supplier</button>
+                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" checked>
+                        <label class="form-check-label" for="is_active">Active</label>
                     </div>
                 </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addSupplierForm" class="btn btn-primary">Save Supplier</button>
             </div>
         </div>
     </div>
@@ -140,15 +128,13 @@ function deleteSupplier(id) {
         fetch(`/suppliers/${id}/delete`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        }).then(response => {
+            if (response.ok) {
                 window.location.reload();
             } else {
-                alert('Error deleting supplier: ' + data.message);
+                alert('Error deleting supplier');
             }
         });
     }

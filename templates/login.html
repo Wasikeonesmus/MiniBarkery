@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Bakery Management System{% endblock %}
+{% block title %}Login{% endblock %}
 
 {% block page_title %}Login{% endblock %}
 
@@ -10,32 +10,49 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="text-center">Login</h3>
+                    <h3 class="text-center">Sign In</h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ url_for('login', next=request.args.get('next', '')) }}">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('login') }}">
                         {{ form.hidden_tag() }}
-                        <div class="form-group">
-                            {{ form.username.label }}
+                        <div class="form-group mb-3">
+                            {{ form.username.label(class="form-label") }}
                             {{ form.username(class="form-control") }}
                             {% for error in form.username.errors %}
                             <span class="text-danger">{{ error }}</span>
                             {% endfor %}
                         </div>
-                        <div class="form-group">
-                            {{ form.password.label }}
+                        <div class="form-group mb-3">
+                            {{ form.password.label(class="form-label") }}
                             {{ form.password(class="form-control") }}
                             {% for error in form.password.errors %}
                             <span class="text-danger">{{ error }}</span>
                             {% endfor %}
                         </div>
-                        <div class="form-group text-center mt-4">
-                            {{ form.submit(class="btn btn-primary") }}
+                        <div class="form-group mb-3">
+                            <div class="form-check">
+                                {{ form.remember(class="form-check-input") }}
+                                {{ form.remember.label(class="form-check-label") }}
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Sign In</button>
                         </div>
                     </form>
-                    <div class="text-center mt-3">
-                        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
-                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <p class="mb-0">New User? <a href="{{ url_for('register') }}">Click to Register!</a></p>
                 </div>
             </div>
         </div>

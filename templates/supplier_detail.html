@@ -6,34 +6,28 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-12 col-lg-4 mb-3 mb-lg-0">
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Supplier Information</h5>
                 <dl class="row">
-                    <dt class="col-sm-4">Name</dt>
-                    <dd class="col-sm-8">{{ supplier.name }}</dd>
-                    
-                    <dt class="col-sm-4">Contact Person</dt>
-                    <dd class="col-sm-8">{{ supplier.contact_person }}</dd>
-                    
-                    <dt class="col-sm-4">Phone</dt>
-                    <dd class="col-sm-8">{{ supplier.phone }}</dd>
-                    
-                    <dt class="col-sm-4">Email</dt>
-                    <dd class="col-sm-8">{{ supplier.email }}</dd>
-                    
-                    <dt class="col-sm-4">Address</dt>
-                    <dd class="col-sm-8">{{ supplier.address }}</dd>
-                    
-                    <dt class="col-sm-4">Status</dt>
-                    <dd class="col-sm-8">
+                    <dt class="col-5 col-sm-4">Name</dt>
+                    <dd class="col-7 col-sm-8">{{ supplier.name }}</dd>
+                    <dt class="col-5 col-sm-4">Contact Person</dt>
+                    <dd class="col-7 col-sm-8">{{ supplier.contact_person }}</dd>
+                    <dt class="col-5 col-sm-4">Phone</dt>
+                    <dd class="col-7 col-sm-8">{{ supplier.phone }}</dd>
+                    <dt class="col-5 col-sm-4">Email</dt>
+                    <dd class="col-7 col-sm-8">{{ supplier.email }}</dd>
+                    <dt class="col-5 col-sm-4">Address</dt>
+                    <dd class="col-7 col-sm-8">{{ supplier.address }}</dd>
+                    <dt class="col-5 col-sm-4">Status</dt>
+                    <dd class="col-7 col-sm-8">
                         <span class="badge {% if supplier.is_active %}bg-success{% else %}bg-danger{% endif %}">
                             {{ "Active" if supplier.is_active else "Inactive" }}
                         </span>
                     </dd>
                 </dl>
-                
                 <div class="d-grid gap-2">
                     <a href="{{ url_for('edit_supplier', id=supplier.id) }}" class="btn btn-warning">
                         <i class="fas fa-edit"></i> Edit Supplier
@@ -45,8 +39,7 @@
             </div>
         </div>
     </div>
-    
-    <div class="col-md-8">
+    <div class="col-12 col-lg-8">
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Supplied Products</h5>
@@ -67,7 +60,7 @@
                             <tr>
                                 <td>{{ product.name }}</td>
                                 <td>{{ product.category }}</td>
-                                <td>${{ "%.2f"|format(product.price) }}</td>
+                                <td>Ksh {{ "%.2f"|format(product.price) }}</td>
                                 <td>{{ product.stock_quantity }}</td>
                                 <td>
                                     <span class="badge {% if product.is_active %}bg-success{% else %}bg-danger{% endif %}">

@@ -2,11 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -20,33 +16,50 @@ parts/
 sdist/
 var/
 wheels/
-share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # Virtual Environment
 venv/
 ENV/
 env/
-.venv/
-env.bak/
-venv.bak/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-.spyderproject
-.spyproject
-.ropeproject
+
+# Database
+*.db
+*.sqlite3
+data/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Distribution / packaging
+share/python-wheels/
+MANIFEST
 
 # Flask
 instance/
 .webassets-cache
-*.db
 
 # Environment variables
 .env
@@ -56,7 +69,6 @@ instance/
 *.log
 
 # OS generated files
-.DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
@@ -65,10 +77,8 @@ ehthumbs.db
 Thumbs.db
 
 # Unit test / coverage reports
-htmlcov/
 .tox/
 .nox/
-.coverage
 .coverage.*
 .cache
 nosetests.xml

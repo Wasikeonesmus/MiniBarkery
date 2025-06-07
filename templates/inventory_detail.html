@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory Details{% endblock %}
+
+{% block page_title %}Inventory Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Item Information</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Name</dt>
+                    <dd class="col-sm-8">{{ item.name }}</dd>
+
+                    <dt class="col-sm-4">Category</dt>
+                    <dd class="col-sm-8">{{ item.category }}</dd>
+
+                    <dt class="col-sm-4">Quantity</dt>
+                    <dd class="col-sm-8">{{ item.quantity }} {{ item.unit }}</dd>
+
+                    <dt class="col-sm-4">Unit Price</dt>
+                    <dd class="col-sm-8">Ksh {{ "%.2f"|format(item.unit_price) }}</dd>
+
+                    <dt class="col-sm-4">Total Value</dt>
+                    <dd class="col-sm-8">Ksh {{ "%.2f"|format(item.quantity * item.unit_price) }}</dd>
+
+                    <dt class="col-sm-4">Minimum Level</dt>
+                    <dd class="col-sm-8">{{ item.minimum_level }} {{ item.unit }}</dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-{{ 'success' if item.quantity > item.minimum_level else 'danger' }}">
+                            {{ 'In Stock' if item.quantity > item.minimum_level else 'Low Stock' }}
+                        </span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Movement History</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Quantity</th>
+                                <th>Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for movement in movements %}
+                            <tr>
+                                <td>{{ movement.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if movement.type == 'in' else 'danger' }}">
+                                        {{ 'Stock In' if movement.type == 'in' else 'Stock Out' }}
+                                    </span>
+                                </td>
+                                <td>{{ movement.quantity }} {{ item.unit }}</td>
+                                <td>{{ movement.reference }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row gap-2">
+            <a href="{{ url_for('edit_inventory', id=item.id) }}" class="btn btn-warning flex-grow-1">
+                <i class="fas fa-edit"></i> Edit Item
+            </a>
+            <a href="{{ url_for('inventory_list') }}" class="btn btn-secondary flex-grow-1">
+                <i class="fas fa-arrow-left"></i> Back to Inventory
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

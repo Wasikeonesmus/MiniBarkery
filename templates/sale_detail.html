@@ -1,50 +1,47 @@
 {% extends "base.html" %}
 
-{% block title %}Sale Details - Bakery Management System{% endblock %}
+{% block title %}Sale Details{% endblock %}
 
 {% block page_title %}Sale Details{% endblock %}
 
 {% block content %}
 <div class="row">
-    <div class="col-md-8">
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Sale #{{ sale.id }}</h5>
-                <div>
-                    {% if sale.payment_status != 'completed' %}
-                    <a href="{{ url_for('process_payment', id=sale.id) }}" class="btn btn-primary">
-                        <i class="fas fa-money-bill"></i> Process Payment
-                    </a>
-                    {% endif %}
-                    <a href="{{ url_for('sale_payments', id=sale.id) }}" class="btn btn-info">
-                        <i class="fas fa-list"></i> View Payments
-                    </a>
-                </div>
-            </div>
+    <div class="col-12 col-lg-4 mb-4">
+        <div class="card">
             <div class="card-body">
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <p><strong>Date:</strong> {{ sale.sale_date.strftime('%Y-%m-%d %H:%M') }}</p>
-                        <p><strong>Customer:</strong> {{ sale.customer_name or 'Walk-in Customer' }}</p>
+                <h5 class="card-title">Sale Information</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Date</dt>
+                    <dd class="col-sm-8">{{ sale.sale_date.strftime('%Y-%m-%d %H:%M') }}</dd>
+
+                    <dt class="col-sm-4">Customer</dt>
+                    <dd class="col-sm-8">{{ sale.customer_name or 'Walk-in Customer' }}</dd>
+
+                    <dt class="col-sm-4">Total Amount</dt>
+                    <dd class="col-sm-8">Ksh {{ "%.2f"|format(sale.total_amount) }}</dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-{{ 'success' if sale.payment_status == 'completed' else 'warning' }}">
+                            {{ sale.payment_status.capitalize() }}
+                        </span>
+                    </dd>
+                </dl>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>Total Amount:</strong> KES {{ "%.2f"|format(sale.total_amount) }}</p>
-                        <p><strong>Payment Status:</strong> 
-                            <span class="badge {% if sale.payment_status == 'completed' %}bg-success{% elif sale.payment_status == 'partial' %}bg-warning{% else %}bg-danger{% endif %}">
-                                {{ sale.payment_status|title }}
-                            </span>
-                        </p>
                     </div>
                 </div>
 
-                <h6>Items</h6>
+    <div class="col-12 col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Sale Items</h5>
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>Product</th>
                                 <th>Quantity</th>
-                                <th>Unit Price</th>
+                                <th>Price</th>
                                 <th>Total</th>
                             </tr>
                         </thead>
@@ -53,63 +50,141 @@
                             <tr>
                                 <td>{{ item.product.name }}</td>
                                 <td>{{ item.quantity }}</td>
-                                <td>KES {{ "%.2f"|format(item.unit_price) }}</td>
-                                <td>KES {{ "%.2f"|format(item.total_price) }}</td>
+                                <td>Ksh {{ "%.2f"|format(item.unit_price) }}</td>
+                                <td>Ksh {{ "%.2f"|format(item.quantity * item.unit_price) }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                                <td><strong>KES {{ "%.2f"|format(sale.total_amount) }}</strong></td>
+                                <th colspan="3" class="text-end">Total:</th>
+                                <th>Ksh {{ "%.2f"|format(sale.total_amount) }}</th>
                             </tr>
                         </tfoot>
                     </table>
+                </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Payment Summary</h5>
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row gap-2">
+            <button onclick="printReceipt()" class="btn btn-primary flex-grow-1">
+                <i class="fas fa-print"></i> Print Receipt
+            </button>
+            <a href="{{ url_for('edit_sale', id=sale.id) }}" class="btn btn-warning flex-grow-1">
+                <i class="fas fa-edit"></i> Edit Sale
+            </a>
+            <a href="{{ url_for('sale_list') }}" class="btn btn-secondary flex-grow-1">
+                <i class="fas fa-arrow-left"></i> Back to Sales
+            </a>
+        </div>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <h6>Total Amount</h6>
-                    <h3 class="text-primary">KES {{ "%.2f"|format(sale.total_amount) }}</h3>
                 </div>
-                <div class="mb-3">
-                    <h6>Total Paid</h6>
-                    <h3 class="text-success">KES {{ "%.2f"|format(sale.payments|sum(attribute='amount')) }}</h3>
-                </div>
-                <div class="mb-3">
-                    <h6>Balance</h6>
-                    <h3 class="text-info">KES {{ "%.2f"|format(sale.total_amount - sale.payments|sum(attribute='amount')) }}</h3>
-                </div>
-                {% if sale.payments %}
-                <h6>Recent Payments</h6>
-                <div class="list-group">
-                    {% for payment in sale.payments[:3] %}
-                    <div class="list-group-item">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">{{ payment.payment_method|title }}</h6>
-                            <small>{{ payment.payment_date.strftime('%Y-%m-%d %H:%M') }}</small>
-                        </div>
-                        <p class="mb-1">KES {{ "%.2f"|format(payment.amount) }}</p>
-                        <small class="text-muted">
-                            Status: 
-                            <span class="badge {% if payment.status == 'completed' %}bg-success{% elif payment.status == 'pending' %}bg-warning{% else %}bg-danger{% endif %}">
-                                {{ payment.status|title }}
-                            </span>
-                        </small>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
+
+<!-- Receipt Template (Hidden) -->
+<div id="receipt" style="display: none; font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #ddd;">
+    <div class="receipt-header text-center mb-4">
+        <h2 style="margin-bottom: 5px;">BARKERY SYSTEM</h2>
+        <p style="margin: 0; font-size: 0.9em; color: #666;">123 Bakery Street, Nairobi, Kenya</p>
+        <p style="margin: 0; font-size: 0.9em; color: #666;">Tel: +254 700 123 456</p>
+        <hr style="border: 0; border-top: 1px solid #ddd; margin: 10px 0;">
+    </div>
+    
+    <div class="receipt-details" style="font-size: 0.9em;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <div>
+                <strong>Receipt #:</strong> {{ sale.id }}
+            </div>
+            <div>
+                <strong>Date:</strong> {{ sale.sale_date.strftime('%Y-%m-%d %H:%M') }}
             </div>
         </div>
+        <div style="margin-bottom: 10px;">
+            <strong>Customer:</strong> {{ sale.customer_name or 'Walk-in Customer' }}
+        </div>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+        <thead>
+            <tr style="border-bottom: 1px solid #ddd;">
+                <th style="text-align: left; padding: 5px;">Item</th>
+                <th style="text-align: center; padding: 5px;">Qty</th>
+                <th style="text-align: right; padding: 5px;">Price</th>
+                <th style="text-align: right; padding: 5px;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in sale.items %}
+            <tr>
+                <td style="text-align: left; padding: 5px;">{{ item.product.name }}</td>
+                <td style="text-align: center; padding: 5px;">{{ item.quantity }}</td>
+                <td style="text-align: right; padding: 5px;">Ksh {{ "%.2f"|format(item.unit_price) }}</td>
+                <td style="text-align: right; padding: 5px;">Ksh {{ "%.2f"|format(item.quantity * item.unit_price) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr style="border-top: 1px solid #ddd; font-weight: bold;">
+                <td colspan="3" style="text-align: right; padding: 5px;">Subtotal:</td>
+                <td style="text-align: right; padding: 5px;">Ksh {{ "%.2f"|format(sale.total_amount * 0.84) }}</td>
+            </tr>
+            <tr>
+                <td colspan="3" style="text-align: right; padding: 5px;">Tax (16%):</td>
+                <td style="text-align: right; padding: 5px;">Ksh {{ "%.2f"|format(sale.total_amount * 0.16) }}</td>
+            </tr>
+            <tr style="font-weight: bold;">
+                <td colspan="3" style="text-align: right; padding: 5px;">Total:</td>
+                <td style="text-align: right; padding: 5px;">Ksh {{ "%.2f"|format(sale.total_amount) }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="receipt-footer text-center" style="font-size: 0.8em; color: #666;">
+        <p style="margin: 0;">Thank you for your business!</p>
+        <p style="margin: 0;">Goods sold are not returnable or exchangeable</p>
     </div>
 </div>
+
+<style>
+@media print {
+    body * {
+        visibility: hidden !important;
+    }
+    #receipt, 
+    #receipt * {
+        visibility: visible !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 10px;
+        font-size: 12px;
+        border: none;
+        box-sizing: border-box;
+    }
+    #receipt {
+        max-width: 100% !important;
+        overflow: visible !important;
+    }
+}
+</style>
+
+<script>
+function printReceipt() {
+    const receiptContent = document.getElementById('receipt');
+    
+    // Ensure the receipt is visible for printing
+    receiptContent.style.display = 'block';
+    
+    // Use browser's print functionality
+    window.print();
+    
+    // Hide the receipt after printing
+    receiptContent.style.display = 'none';
+}
+</script>
 {% endblock %} 

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Expense Details{% endblock %}
+
+{% block page_title %}Expense Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Expense Information</h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Date</dt>
+                    <dd class="col-sm-8">{{ expense.date.strftime('%Y-%m-%d') }}</dd>
+
+                    <dt class="col-sm-4">Description</dt>
+                    <dd class="col-sm-8">{{ expense.description }}</dd>
+
+                    <dt class="col-sm-4">Amount</dt>
+                    <dd class="col-sm-8">Ksh {{ "%.2f"|format(expense.amount) }}</dd>
+
+                    <dt class="col-sm-4">Category</dt>
+                    <dd class="col-sm-8">{{ expense.category }}</dd>
+
+                    <dt class="col-sm-4">Created At</dt>
+                    <dd class="col-sm-8">{{ expense.created_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Expense Details</h5>
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>Description</th>
+                                <td>{{ expense.description }}</td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td>Ksh {{ "%.2f"|format(expense.amount) }}</td>
+                            </tr>
+                            <tr>
+                                <th>Category</th>
+                                <td>{{ expense.category }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date</th>
+                                <td>{{ expense.date.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            <tr>
+                                <th>Created At</th>
+                                <td>{{ expense.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row gap-2">
+            <a href="{{ url_for('edit_expense', id=expense.id) }}" class="btn btn-warning flex-grow-1">
+                <i class="fas fa-edit"></i> Edit Expense
+            </a>
+            <a href="{{ url_for('expense_list') }}" class="btn btn-secondary flex-grow-1">
+                <i class="fas fa-arrow-left"></i> Back to Expenses
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

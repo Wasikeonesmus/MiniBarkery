@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory{% endblock %}
+
+{% block page_title %}Inventory{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{{ url_for('import_inventory') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-file-import"></i> Import Inventory
+            </a>
+            <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#addInventoryModal">
+                <i class="fas fa-plus"></i> Add Stock
+            </button>
+        </div>
+    </div>
+</div>
+
+// ... existing code ... 
