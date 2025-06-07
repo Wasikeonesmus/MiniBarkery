@@ -117,6 +117,7 @@ def load_user(user_id):
         return None
 
 def init_db():
+    """Initialize the database with default data."""
     try:
         # Drop all existing tables (use with caution in production)
         db.drop_all()
@@ -136,12 +137,10 @@ def init_db():
             )
             admin_user.set_password('adminpassword')  # Use a secure password
             db.session.add(admin_user)
-        else:
-            # If admin exists, just reset the password
-            existing_admin.set_password('adminpassword')
         
         # Commit changes
         db.session.commit()
+        
         logger.info("Database initialized successfully")
     except Exception as e:
         db.session.rollback()
@@ -427,13 +426,30 @@ def adjust_stock(product_id):
     """Adjust stock quantity for a specific product."""
     try:
         # Get form data
-        quantity = int(request.form.get('quantity', 0))
+        quantity = request.form.get('quantity')
         adjustment_type = request.form.get('adjustment_type')
 
-        # Validate input
+        # Validate inputs
+        if not quantity or not adjustment_type:
+            return jsonify({
+                'success': False, 
+                'message': 'Missing required parameters.'
+            }), 400
+
+        try:
+            quantity = int(quantity)
+        except ValueError:
+            return jsonify({
+                'success': False, 
+                'message': 'Quantity must be a valid number.'
+            }), 400
+
+        # Validate quantity
         if quantity <= 0:
-            flash('Quantity must be a positive number.', 'error')
-            return redirect(url_for('inventory'))
+            return jsonify({
+                'success': False, 
+                'message': 'Quantity must be a positive number.'
+            }), 400
 
         # Find the product
         product = Product.query.get_or_404(product_id)
@@ -441,16 +457,18 @@ def adjust_stock(product_id):
         # Adjust stock based on type
         if adjustment_type == 'add':
             product.stock_quantity += quantity
-            flash(f'Added {quantity} units to {product.name} stock.', 'success')
         elif adjustment_type == 'remove':
             if product.stock_quantity < quantity:
-                flash(f'Cannot remove more stock than available for {product.name}.', 'error')
-                return redirect(url_for('inventory'))
+                return jsonify({
+                    'success': False, 
+                    'message': f'Cannot remove more stock than available for {product.name}.'
+                }), 400
             product.stock_quantity -= quantity
-            flash(f'Removed {quantity} units from {product.name} stock.', 'success')
         else:
-            flash('Invalid adjustment type.', 'error')
-            return redirect(url_for('inventory'))
+            return jsonify({
+                'success': False, 
+                'message': 'Invalid adjustment type.'
+            }), 400
 
         # Log stock adjustment
         stock_adjustment = StockAdjustment(
@@ -462,12 +480,17 @@ def adjust_stock(product_id):
         db.session.add(stock_adjustment)
         db.session.commit()
 
-        return redirect(url_for('inventory'))
+        return jsonify({
+            'success': True, 
+            'message': f'Successfully {"added" if adjustment_type == "add" else "removed"} {quantity} units from {product.name} stock.'
+        }), 200
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error creating stock adjustment: {str(e)}")
-        flash('An error occurred while adjusting stock. Please try again later.', 'error')
-        return redirect(url_for('inventory'))
+        return jsonify({
+            'success': False, 
+            'message': 'An error occurred while adjusting stock. Please try again later.'
+        }), 500
 
 @app.route('/inventory/history/<int:product_id>')
 @login_required

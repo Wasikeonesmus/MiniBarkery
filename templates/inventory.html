@@ -79,7 +79,7 @@
             </div>
             <div class="modal-body">
                 <form id="addStockForm" method="POST" action="{{ url_for('add_stock') }}">
-                    {{ csrf_token() }}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label class="form-label">Product</label>
                         <select name="product_id" class="form-control" required>
@@ -117,6 +117,7 @@
             </div>
             <div class="modal-body">
                 <form id="adjustStockForm" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" id="adjustProductId" name="product_id">
                     <div class="mb-3">
                         <label class="form-label">Quantity</label>
@@ -154,7 +155,84 @@ function adjustStock(productId) {
     form.action = `/inventory/adjust-stock/${productId}`;
     
     document.getElementById('adjustProductId').value = productId;
+    
+    // Add form submission event listener
+    form.addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+        
+        // Gather form data
+        const formData = new FormData(form);
+        
+        // Get CSRF token from meta tag
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        
+        // Fetch request for more detailed error handling
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken ? csrfToken.getAttribute('content') : ''
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                // Reload the page or update UI
+                window.location.reload();
+            } else {
+                // Show error message
+                alert(data.message || 'An error occurred while adjusting stock');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An unexpected error occurred');
+        });
+    });
+    
     modal.show();
 }
+
+// Add stock form submission handler
+document.getElementById('addStockForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent default form submission
+    
+    // Gather form data
+    const formData = new FormData(this);
+    
+    // Get CSRF token from meta tag
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    
+    // Fetch request for more detailed error handling
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': csrfToken ? csrfToken.getAttribute('content') : ''
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            // Reload the page or update UI
+            window.location.reload();
+        } else {
+            // Show error message
+            alert(data.message || 'An error occurred while adding stock');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An unexpected error occurred');
+    });
+});
 </script>
 {% endblock %} 
