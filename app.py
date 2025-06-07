@@ -421,31 +421,50 @@ def add_stock():
 @app.route('/inventory/adjust-stock/<int:product_id>', methods=['POST'])
 @login_required
 def adjust_stock(product_id):
-    quantity = request.form.get('quantity')
-    notes = request.form.get('notes')
-    
+    """Adjust stock quantity for a specific product."""
     try:
+        # Get form data
+        quantity = int(request.form.get('quantity', 0))
+        adjustment_type = request.form.get('adjustment_type')
+
+        # Validate input
+        if quantity <= 0:
+            flash('Quantity must be a positive number.', 'error')
+            return redirect(url_for('inventory'))
+
+        # Find the product
         product = Product.query.get_or_404(product_id)
-        product.stock_quantity = int(quantity)
-        product.updated_at = datetime.now(timezone.utc)
-        
-        # Create stock history record
-        stock_history = StockHistory(
+
+        # Adjust stock based on type
+        if adjustment_type == 'add':
+            product.stock_quantity += quantity
+            flash(f'Added {quantity} units to {product.name} stock.', 'success')
+        elif adjustment_type == 'remove':
+            if product.stock_quantity < quantity:
+                flash(f'Cannot remove more stock than available for {product.name}.', 'error')
+                return redirect(url_for('inventory'))
+            product.stock_quantity -= quantity
+            flash(f'Removed {quantity} units from {product.name} stock.', 'success')
+        else:
+            flash('Invalid adjustment type.', 'error')
+            return redirect(url_for('inventory'))
+
+        # Log stock adjustment
+        stock_adjustment = StockAdjustment(
             product_id=product.id,
-            quantity=int(quantity),
-            type='adjustment',
-            notes=notes,
+            quantity=quantity,
+            adjustment_type=adjustment_type,
             user_id=current_user.id
         )
-        
-        db.session.add(stock_history)
+        db.session.add(stock_adjustment)
         db.session.commit()
-        
-        invalidate_dashboard_cache()
-        
-        return jsonify({'success': True})
+
+        return redirect(url_for('inventory'))
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        db.session.rollback()
+        logger.error(f"Error creating stock adjustment: {str(e)}")
+        flash('An error occurred while adjusting stock. Please try again later.', 'error')
+        return redirect(url_for('inventory'))
 
 @app.route('/inventory/history/<int:product_id>')
 @login_required
@@ -1385,4 +1404,4 @@ if __name__ == '__main__':
     init_db()
     app.run(debug=True, host='0.0.0.0', port=5000)
 
-# test commit – verifying git detection
+# test commit verifying git detection

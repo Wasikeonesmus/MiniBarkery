@@ -54,8 +54,8 @@
                                         <button onclick="viewHistory({{ product.id }})" class="btn btn-info btn-sm">
                                             <i class="fas fa-history"></i>
                                         </button>
-                                        <button onclick="adjustStock({{ product.id }})" class="btn btn-warning btn-sm">
-                                            <i class="fas fa-edit"></i>
+                                        <button class="btn btn-sm btn-primary" onclick="adjustStock({{ product.id }})">
+                                            <i class="fas fa-edit"></i> Adjust
                                         </button>
                                     </div>
                                 </td>
@@ -107,7 +107,7 @@
     </div>
 </div>
 
-<!-- Stock Adjustment Modal -->
+<!-- Adjust Stock Modal -->
 <div class="modal fade" id="adjustStockModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -116,23 +116,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="adjustStockForm" method="POST" action="{{ url_for('adjust_stock') }}">
-                    {{ csrf_token() }}
-                    <input type="hidden" name="product_id" id="adjustProductId">
+                <form id="adjustStockForm" method="POST">
+                    <input type="hidden" id="adjustProductId" name="product_id">
+                    <div class="mb-3">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" class="form-control" name="quantity" required>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Adjustment Type</label>
-                        <select name="adjustment_type" class="form-control" required>
+                        <select class="form-control" name="adjustment_type" required>
                             <option value="add">Add Stock</option>
                             <option value="remove">Remove Stock</option>
                         </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" name="quantity" class="form-control" required min="1">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Reason</label>
-                        <textarea name="reason" class="form-control" rows="3" required></textarea>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -153,6 +148,11 @@ function viewHistory(productId) {
 
 function adjustStock(productId) {
     const modal = new bootstrap.Modal(document.getElementById('adjustStockModal'));
+    const form = document.getElementById('adjustStockForm');
+    
+    // Dynamically set the form action with the product ID
+    form.action = `/inventory/adjust-stock/${productId}`;
+    
     document.getElementById('adjustProductId').value = productId;
     modal.show();
 }

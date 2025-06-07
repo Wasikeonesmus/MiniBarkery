@@ -283,6 +283,24 @@ class Payment(db.Model):
     def __repr__(self):
         return f'<Payment {self.id}>'
 
+class StockAdjustment(db.Model):
+    """Model to track stock adjustments for products."""
+    __tablename__ = 'stock_adjustments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    adjustment_type = db.Column(db.String(10), nullable=False)  # 'add' or 'remove'
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+
+    # Relationships
+    product = db.relationship('Product', backref=db.backref('stock_adjustments', lazy='dynamic'))
+    user = db.relationship('User', backref=db.backref('stock_adjustments', lazy='dynamic'))
+
+    def __repr__(self):
+        return f'<StockAdjustment {self.adjustment_type} {self.quantity} of {self.product.name} by {self.user.username}>'
+
 # Add event listeners for automatic timestamp updates
 @event.listens_for(db.Model, 'before_update')
 def receive_before_update(mapper, connection, target):
