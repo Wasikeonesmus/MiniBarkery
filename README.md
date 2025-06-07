@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Bakery Management System
 
 A comprehensive web-based bakery management system built with Flask that helps manage inventory, sales, employees, and production.
@@ -222,3 +223,6 @@ The test suite covers:
 - Follow the existing test structure
 - Ensure each test method starts with `test_`
 - Use `setUp()` and `tearDown()` for test initialization and cleanup
+=======
+# Upendo_bakery
+>>>>>>> 29589ccdf72a450c57090a231850733fa4746486
